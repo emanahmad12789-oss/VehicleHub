@@ -18,6 +18,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ===============================
+// MONGODB CONNECTION
+// ===============================
+
 let cachedConnection = null;
 
 async function connectDB() {
@@ -26,7 +30,7 @@ async function connectDB() {
   }
 
   if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI environment variable is missing");
+    throw new Error("MONGO_URI is missing");
   }
 
   cachedConnection = await mongoose.connect(process.env.MONGO_URI);
@@ -36,11 +40,17 @@ async function connectDB() {
   return cachedConnection;
 }
 
-// API routes
+// ===============================
+// API ROUTES
+// ===============================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
-// Test route
+// ===============================
+// TEST API
+// ===============================
+
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -48,7 +58,10 @@ app.get("/", (req, res) => {
   });
 });
 
+// ===============================
 // 404
+// ===============================
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -56,7 +69,10 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// ===============================
+// ERROR HANDLER
+// ===============================
+
 app.use((error, req, res, next) => {
   console.error("SERVER ERROR:", error);
 
@@ -67,10 +83,14 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Vercel serverless handler
+// ===============================
+// VERCEL HANDLER
+// ===============================
+
 module.exports = async (req, res) => {
   try {
     await connectDB();
+
     return app(req, res);
   } catch (error) {
     console.error("DATABASE/SERVER ERROR:", error);
