@@ -2,8 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-require("dotenv").config();
-
 const authRoutes = require("../backend/routes/auth");
 const vehicleRoutes = require("../backend/routes/vehicles");
 
@@ -20,23 +18,22 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection
-let isConnected = false;
+let cachedConnection = null;
 
 async function connectDB() {
-  if (isConnected) {
-    return;
+  if (cachedConnection) {
+    return cachedConnection;
   }
 
   if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is missing");
+    throw new Error("MONGO_URI environment variable is missing");
   }
 
-  await mongoose.connect(process.env.MONGO_URI);
-
-  isConnected = true;
+  cachedConnection = await mongoose.connect(process.env.MONGO_URI);
 
   console.log("MongoDB Connected Successfully");
+
+  return cachedConnection;
 }
 
 // API routes
@@ -44,26 +41,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
 // Test route
-app.get("/", async (req, res) => {
-  try {
-    await connectDB();
-
-    res.json({
-      success: true,
-      message: "VehicleHub Backend is running 🚗",
-    });
-  } catch (error) {
-    console.error("MongoDB Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Database connection failed",
-      error: error.message,
-    });
-  }
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "VehicleHub Backend is running 🚗",
+  });
 });
 
-// Catch-all
+// 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -71,17 +56,28 @@ app.use((req, res) => {
   });
 });
 
-// Vercel handler
+// Error handler
+app.use((error, req, res, next) => {
+  console.error("SERVER ERROR:", error);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error: error.message,
+  });
+});
+
+// Vercel serverless handler
 module.exports = async (req, res) => {
   try {
     await connectDB();
     return app(req, res);
   } catch (error) {
-    console.error("SERVER ERROR:", error);
+    console.error("DATABASE/SERVER ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Backend connection failed",
       error: error.message,
     });
   }
