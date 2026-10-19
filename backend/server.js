@@ -1,3 +1,4 @@
+```javascript
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,55 +11,28 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: [
+      "http://localhost:5173",
+      "https://vehicle-hub-nu.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ===============================
-// MONGODB
-// ===============================
-
-if (!process.env.MONGO_URI) {
-  console.error("❌ MONGO_URI is missing in .env");
-  process.exit(1);
-}
-
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB Connected Successfully");
-  })
-  .catch((error) => {
-    console.error("❌ MongoDB Connection Failed");
-    console.error(error.message);
-  });
-
-// ===============================
-// ROUTES
-// ===============================
-
-app.use("/api/auth", authRoutes);
-app.use("/api/vehicles", vehicleRoutes);
-
-// ===============================
-// HOME
-// ===============================
-
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
-    message: "VehicleHub Backend is running 🚗",
+    message: "VehicleHub Backend is running!",
   });
 });
 
-// ===============================
-// 404
-// ===============================
+app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -67,27 +41,35 @@ app.use((req, res) => {
   });
 });
 
-// ===============================
-// ERROR HANDLER
-// ===============================
-
 app.use((error, req, res, next) => {
   console.error("SERVER ERROR:", error);
 
   res.status(500).json({
     success: false,
     message: "Internal server error",
-    error: error.message,
   });
 });
 
-// ===============================
-// SERVER
-// ===============================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(
-    `🚀 VehicleHub Server running on port ${PORT}`
-  );
-});
+async function startServer() {
+  try {
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing in Railway Variables");
+    }
+
+    await mongoose.connect(process.env.MONGO_URI);
+
+    console.log("MongoDB Connected Successfully");
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`VehicleHub Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
+```
