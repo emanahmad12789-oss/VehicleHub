@@ -377,7 +377,7 @@ function Home() {
               <ArrowRight size={17} />
             </Link>
 
-          </div>
+          </div> 
 
           {/* LOADING */}
           {loading && (
