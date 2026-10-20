@@ -34,8 +34,8 @@ mongoose
     console.error(error.message);
   });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/vehicles", vehicleRoutes);
+app.use("https://vehicle-hub-7ozg-three.vercel.app/api/auth", authRoutes);
+app.use("https://vehicle-hub-7ozg-three.vercel.app/api/vehicles", vehicleRoutes);
 
 app.get("/", (req, res) => {
   res.json({

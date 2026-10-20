@@ -5,7 +5,7 @@
   "installCommand": "npm install",
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "https://vehicle-hub-7ozg-three.vercel.app/api/(.*)",
       "destination": "/api"
     },
     {

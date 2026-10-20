@@ -32,7 +32,7 @@ function Home() {
         setLoading(true);
         setError("");
 
-        const response = await fetch("/api/vehicles");
+        const response = await fetch("https://vehicle-hub-7ozg-three.vercel.app/api/vehicles");
 
         if (!response.ok) {
           throw new Error("Failed to fetch vehicles");

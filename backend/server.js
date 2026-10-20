@@ -56,8 +56,8 @@ app.get("/health", (req, res) => {
 });
 
 // API routes
-app.use("/api/auth", authRoutes);
-app.use("/api/vehicles", vehicleRoutes);
+app.use("https://vehicle-hub-7ozg-three.vercel.app/api/auth", authRoutes);
+app.use("https://vehicle-hub-7ozg-three.vercel.app/api/vehicles", vehicleRoutes);
 
 // 404 handler
 app.use((req, res) => {
