@@ -33,7 +33,7 @@ function Home() {
         setError("");
 
         const response = await fetch(
-          "http://localhost:5000/api/vehicles"
+          "https://vehicle-hub-7ozg-three.vercel.app/api/vehicles"
         );
 
         if (!response.ok) {
@@ -115,7 +115,7 @@ function Home() {
     }
 
     if (image.startsWith("/")) {
-      return `http://localhost:5000${image}`;
+      return `https://vehicle-hub-7ozg-three.vercel.app${image}`;
     }
 
     return image;
