@@ -8,8 +8,11 @@ const vehicleRoutes = require("./routes/vehicles");
 
 const app = express();
 
+const PORT = process.env.PORT || 5000;
+
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:3000",
   "https://vehicle-hub-nu.vercel.app",
 ];
 
@@ -21,9 +24,9 @@ app.use(
       }
 
       console.error("Blocked CORS origin:", origin);
-      return callback(new Error("Origin not allowed by CORS"));
+      return callback(null, false);
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
@@ -32,6 +35,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Backend status
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -39,17 +43,23 @@ app.get("/", (req, res) => {
   });
 });
 
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
+    server: "running",
     database:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+      mongoose.connection.readyState === 1
+        ? "connected"
+        : "disconnected",
   });
 });
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -57,15 +67,9 @@ app.use((req, res) => {
   });
 });
 
-app.use((error, req, res, next) => {
-  console.error("SERVER ERROR:", error.message);
-
-  if (error.message === "Origin not allowed by CORS") {
-    return res.status(403).json({
-      success: false,
-      message: "Origin not allowed by CORS",
-    });
-  }
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("Server error:", err.message);
 
   res.status(500).json({
     success: false,
@@ -73,8 +77,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
+// MongoDB connection and server startup
 async function startServer() {
   try {
     if (!process.env.MONGO_URI) {
