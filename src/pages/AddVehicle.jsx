@@ -110,7 +110,7 @@ function AddVehicle() {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/vehicles",
+        "http://https://vehicle-hub-7ozg-three.vercel.app/api/vehicles",
         {
           method: "POST",
 

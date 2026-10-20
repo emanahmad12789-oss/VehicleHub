@@ -44,7 +44,7 @@ function EditVehicle() {
         setError("");
 
         const response = await fetch(
-          `http://localhost:5000/api/vehicles/${id}`
+          `http://https://vehicle-hub-7ozg-three.vercel.app/api/vehicles/${id}`
         );
 
         const data = await response.json();
@@ -107,7 +107,7 @@ function EditVehicle() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5000/api/vehicles/${id}`,
+        `http://https://vehicle-hub-7ozg-three.vercel.app/api/vehicles/${id}`,
         {
           method: "PUT",
           headers: {
