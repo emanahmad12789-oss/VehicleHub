@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = "http://localhost:5000/api/vehicles";
+const API_URL = "https://vehicle-hub-7ozg-three.vercel.app";
 
 function MyListings() {
   const navigate = useNavigate();
@@ -126,13 +126,13 @@ function MyListings() {
 
     try {
       const response = await fetch(
-        `${API_URL}/${id}`,
+        `${API_URL}/api/vehicles/${id}`,
         {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+         headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("vehicleHubToken")}`,
+},
       );
 
       const data = await response.json();
