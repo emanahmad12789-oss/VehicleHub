@@ -23,7 +23,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        "http://https://vehicle-hub-7ozg-three.vercel.app/api/auth/register",
+        "https://vehicle-hub-7ozg-three.vercel.app/api/auth/register",
         {
           method: "POST",
           headers: {
