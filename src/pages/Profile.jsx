@@ -52,7 +52,7 @@ function Profile() {
 
         // Get latest user information from MongoDB
         const response = await fetch(
-          `http://localhost:5000/api/auth/profile/${parsedUser._id}`
+          `https://vehicle-hub-7ozg-three.vercel.app/api/auth/profile/${parsedUser._id}`
         );
 
         const data = await response.json();
@@ -144,7 +144,7 @@ function Profile() {
       setSaving(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/auth/profile/${user._id}`,
+        `https://vehicle-hub-7ozg-three.vercel.app/api/auth/profile/${user._id}`
         {
           method: "PUT",
           headers: {
