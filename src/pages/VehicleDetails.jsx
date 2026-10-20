@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = "http://localhost:5000/api/vehicles";
+const API_URL = const API_URL = "https://vehicle-hub-7ozg-three.vercel.app";
 
 function VehicleDetails() {
   const { id } = useParams();
@@ -29,7 +29,7 @@ function VehicleDetails() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_URL}/${id}`);
+        const response = await fetch(`${API_URL}/${id}`)
 
         const data = await response.json();
 
