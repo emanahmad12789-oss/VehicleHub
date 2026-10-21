@@ -9,7 +9,7 @@ const vehicleRoutes = require("./routes/vehicles");
 
 const app = express();
 
-// Allow frontend origins
+// Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -20,13 +20,13 @@ const allowedOrigins = [
 // CORS configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
+    const isVercelPreview =
+      origin &&
       /^https:\/\/vehicle-[a-z0-9-]+-vehicle-hub\.vercel\.app$/.test(
         origin
-      )
-    ) {
+      );
+
+    if (!origin || allowedOrigins.includes(origin) || isVercelPreview) {
       return callback(null, true);
     }
 
@@ -42,15 +42,12 @@ const corsOptions = {
     "DELETE",
     "OPTIONS",
   ],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-  ],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
   optionsSuccessStatus: 204,
 };
 
-// Apply CORS before all routes
+// Apply CORS before routes and database connection
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
@@ -111,7 +108,7 @@ app.get("/health", async (req, res) => {
       success: false,
       server: "running",
       database: "disconnected",
-      message: error.message,
+      message: "Database connection failed",
     });
   }
 });
@@ -131,7 +128,7 @@ app.use("/api", async (req, res, next) => {
   }
 });
 
-// API routes: paths only
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
@@ -143,9 +140,9 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Final error handler
 app.use((err, req, res, next) => {
-  console.error("Server error:", err.message);
+  console.error("Server error:", err.stack || err);
 
   if (res.headersSent) {
     return next(err);
@@ -156,18 +153,6 @@ app.use((err, req, res, next) => {
     message: "Internal server error",
   });
 });
-// Temporary error debugging
-app.use((err, req, res, next) => {
-  console.error("SERVER ERROR:", err.stack || err);
-
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  res.status(500).json({
-    success: false,
-    message: err.message || "Internal server error",
-  });
 
 // Vercel serverless export
 module.exports = app;
