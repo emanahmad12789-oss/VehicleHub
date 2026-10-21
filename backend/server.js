@@ -8,19 +8,23 @@ const vehicleRoutes = require("./routes/vehicles");
 
 const app = express();
 
+// Frontend URLs
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://vehicle-hub-nu.vercel.app",
+  "https://vehicle-j4kungghv-vehicle-hub.vercel.app",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests without an Origin header
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
+      console.error("Blocked CORS origin:", origin);
       return callback(new Error("Origin not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -29,10 +33,14 @@ app.use(
   })
 );
 
+// Handle preflight requests
+app.options(/.*/, cors());
+
+// Request body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// MongoDB connection for Vercel serverless
+// MongoDB connection
 let connectionPromise = null;
 
 async function connectDB() {
@@ -41,7 +49,7 @@ async function connectDB() {
   }
 
   if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is missing in Vercel Environment Variables");
+    throw new Error("MONGO_URI is missing in environment variables");
   }
 
   if (!connectionPromise) {
@@ -64,7 +72,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// Health check
+// Database health check
 app.get("/health", async (req, res) => {
   try {
     await connectDB();
@@ -86,7 +94,7 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Connect database before API requests
+// Connect MongoDB before API requests
 app.use("/api", async (req, res, next) => {
   try {
     await connectDB();
@@ -101,7 +109,7 @@ app.use("/api", async (req, res, next) => {
   }
 });
 
-// API routes: use PATHS, not full URLs
+// API routes — paths only, never full URLs
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
