@@ -8,8 +8,6 @@ const vehicleRoutes = require("./routes/vehicles");
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
-
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -23,8 +21,7 @@ app.use(
         return callback(null, true);
       }
 
-      console.error("Blocked CORS origin:", origin);
-      return callback(null, false);
+      return callback(new Error("Origin not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -35,6 +32,30 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// MongoDB connection for Vercel serverless
+let connectionPromise = null;
+
+async function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is missing in Vercel Environment Variables");
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose
+      .connect(process.env.MONGO_URI)
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  await connectionPromise;
+}
+
 // Backend status
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -44,20 +65,45 @@ app.get("/", (req, res) => {
 });
 
 // Health check
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    server: "running",
-    database:
-      mongoose.connection.readyState === 1
-        ? "connected"
-        : "disconnected",
-  });
+app.get("/health", async (req, res) => {
+  try {
+    await connectDB();
+
+    res.status(200).json({
+      success: true,
+      server: "running",
+      database: "connected",
+    });
+  } catch (error) {
+    console.error("Health check error:", error.message);
+
+    res.status(503).json({
+      success: false,
+      server: "running",
+      database: "disconnected",
+      message: error.message,
+    });
+  }
 });
 
-// API routes
-app.use("https://vehicle-hub-7ozg-three.vercel.app/api/auth", authRoutes);
-app.use("https://vehicle-hub-7ozg-three.vercel.app/api/vehicles", vehicleRoutes);
+// Connect database before API requests
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+
+    res.status(503).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
+
+// API routes: use PATHS, not full URLs
+app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -71,30 +117,13 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
 
+  if (res.headersSent) {
+    return next(err);
+  }
+
   res.status(500).json({
     success: false,
     message: "Internal server error",
   });
 });
-
-// MongoDB connection and server startup
-async function startServer() {
-  try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing in environment variables");
-    }
-
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("MongoDB connected successfully");
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`VehicleHub server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Server startup failed:", error.message);
-    process.exit(1);
-  }
-}
-
-startServer();
+module.exports = app;
