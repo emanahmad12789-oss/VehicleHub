@@ -156,6 +156,18 @@ app.use((err, req, res, next) => {
     message: "Internal server error",
   });
 });
+// Temporary error debugging
+app.use((err, req, res, next) => {
+  console.error("SERVER ERROR:", err.stack || err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
 
 // Vercel serverless export
 module.exports = app;
