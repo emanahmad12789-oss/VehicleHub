@@ -23,7 +23,11 @@ function Login() {
     setLoading(true);
 
     try {
+<<<<<<< HEAD
       const response = await fetch(`${API_URL}/api/auth/login`,  {
+=======
+      const response = await fetch(API_URL + "https://vehicle-hub-7ozg-three.vercel.app/api/auth/login" {
+>>>>>>> cf6d2102bcf3363c31920b39f9a604f97c2e4d7c
         method: "POST",
         headers: {
           "Content-Type": "application/json",
