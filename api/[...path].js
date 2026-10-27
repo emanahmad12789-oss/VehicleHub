@@ -95,16 +95,26 @@ app.use((error, req, res, next) => {
 // ===============================
 
 module.exports = async (req, res) => {
+  // Set CORS headers before connecting to MongoDB so the browser can show
+  // the real backend error instead of hiding it as a network/CORS failure.
+  const origin = req.headers.origin;
+  res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   try {
     await connectDB();
-
     return app(req, res);
   } catch (error) {
     console.error("DATABASE/SERVER ERROR:", error);
-
     return res.status(500).json({
       success: false,
-      message: "Backend connection failed",
+      message: "Backend connection failed. Check MONGO_URI and MongoDB Atlas network access.",
       error: error.message,
     });
   }
