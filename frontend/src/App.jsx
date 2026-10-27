@@ -11,6 +11,7 @@ import MyListings from "./pages/MyListings";
 import VehicleDetails from "./pages/VehicleDetails";
 import Favorites from "./pages/Favorites";
 import Messages from "./pages/messages";
+import EditVehicle from "./pages/EditVehicle";
 
 function App() {
   return (
@@ -61,6 +62,12 @@ function App() {
         <Route
           path="/my-listings"
           element={<MyListings />}
+        />
+
+        {/* EDIT VEHICLE */}
+        <Route
+          path="/edit-vehicle/:id"
+          element={<EditVehicle />}
         />
 
         {/* VEHICLE DETAILS */}
