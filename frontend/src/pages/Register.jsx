@@ -40,15 +40,24 @@ function Register() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setError(data.message || "Registration failed");
+      if (!response.ok || data.success === false) {
+        setError(data.message || "Registration failed. Please try again.");
         return;
       }
 
-      alert("Account created successfully!");
+      // Registration already returns a signed-in session; store it consistently.
+      if (data.token) localStorage.setItem("vehicleHubToken", data.token);
+      if (data.user) {
+        localStorage.setItem("vehicleHubLoggedIn", JSON.stringify(data.user));
+        localStorage.setItem("vehicleHubUser", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.user.email) {
+          localStorage.setItem("userEmail", data.user.email);
+          localStorage.setItem("email", data.user.email);
+        }
+      }
 
-      // Go to Login
-      navigate("/login");
+      navigate("/profile", { replace: true });
 
     } catch (error) {
       console.error("Registration error:", error);
