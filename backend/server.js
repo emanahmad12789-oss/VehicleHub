@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
 const vehicleRoutes = require("./routes/vehicles");
+const messageRoutes = require("./routes/messages");
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.get("/health", (req, res) => {
 // API routes (FIXED — relative paths)
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/messages", messageRoutes);
 
 // 404 handler
 app.use((req, res) => {
