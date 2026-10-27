@@ -1,21 +1,18 @@
-
 {
-  "name": "vehiclehub-frontend",
+  "name": "vehiclehub",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "scripts": { 
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+  "description": "VehicleHub full-stack vehicle marketplace",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "start": "node api/index.js"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "react-router-dom": "latest",
-    "lucide-react": "latest"
-  },
-  "devDependencies": {}
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.18.0"
+  }
 }
