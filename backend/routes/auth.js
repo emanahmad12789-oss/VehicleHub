@@ -5,7 +5,12 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
-const JWT_SECRET = process.env.JWT_SECRET || "vehiclehub_dev_secret_change_me";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+function signToken(user) {
+  if (!JWT_SECRET) throw new Error("JWT_SECRET is not configured");
+  return jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+}
 
 // ================= REGISTER =================
 
@@ -40,9 +45,7 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = signToken(user);
 
     res.status(201).json({
       success: true,
