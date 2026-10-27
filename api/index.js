@@ -107,7 +107,7 @@ module.exports = async (req, res) => {
         errorType: error.name || "DatabaseError",
         errorCode: error.code || error.codeName || null,
         details: String(error.message || "Unknown database error")
-          .replace(/mongodb(?:\\+srv)?:\\/\\/\\S+/gi, "[redacted MongoDB URI]")
+          .replace(/mongodb\S*/gi, "[redacted MongoDB URI]")
           .slice(0, 400),
         message: "MONGO_URI exists, but MongoDB connection failed. Check the Atlas password, URL encoding, cluster status, and Network Access."
       });
