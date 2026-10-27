@@ -67,11 +67,16 @@ function MyListings() {
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/my-listings?email=${encodeURIComponent(
-          user.email
-        )}`
-      );
+      const token = localStorage.getItem("vehicleHubToken");
+      if (!token) {
+        setVehicles([]);
+        setError("Your login session has expired. Please log in again.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/my-listings`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       const data = await response.json();
 
@@ -131,6 +136,7 @@ function MyListings() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("vehicleHubToken") || ""}`,
           },
         }
       );
