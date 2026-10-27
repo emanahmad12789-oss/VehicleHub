@@ -112,6 +112,7 @@ function EditVehicle() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("vehicleHubToken") || ""}`,
           },
           body: JSON.stringify({
             ...formData,
