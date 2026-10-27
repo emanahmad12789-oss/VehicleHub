@@ -4,107 +4,110 @@ const cors = require("cors");
 
 const authRoutes = require("../backend/routes/auth");
 const vehicleRoutes = require("../backend/routes/vehicles");
+const messageRoutes = require("../backend/routes/messages");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
-
-// ===============================
-// MONGODB CONNECTION (cached for serverless)
-// ===============================
 
 let cachedConnection = null;
 
 async function connectDB() {
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    return cachedConnection;
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (!process.env.MONGO_URI) throw new Error("MONGO_URI is missing in Vercel Environment Variables");
+
+  if (!cachedConnection) {
+    cachedConnection = mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      maxPoolSize: 10
+    });
   }
 
-  if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is missing");
+  try {
+    await cachedConnection;
+    return mongoose.connection;
+  } catch (error) {
+    cachedConnection = null;
+    throw error;
   }
-
-  cachedConnection = await mongoose.connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 30000,
-  });
-
-  console.log("MongoDB Connected Successfully");
-
-  return cachedConnection;
 }
 
-// ===============================
-// API ROUTES (FIXED — relative paths)
-// ===============================
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/messages", messageRoutes);
 
-// ===============================
-// ROOT + HEALTH
-// ===============================
 app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "VehicleHub Backend is running 🚗",
-  });
+  res.json({ success: true, message: "VehicleHub Backend is running." });
 });
-
 app.get("/health", (req, res) => {
   res.json({
     success: true,
     server: "running",
-    database:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    database: mongoose.connection.readyState === 1 ? "connected" : "not_checked"
   });
 });
 
-// ===============================
-// 404
-// ===============================
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  });
+  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
-// ===============================
-// ERROR HANDLER
-// ===============================
 app.use((error, req, res, next) => {
   console.error("SERVER ERROR:", error);
-
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-    error: error.message,
-  });
+  res.status(500).json({ success: false, message: "Internal server error." });
 });
 
-// ===============================
-// VERCEL HANDLER
-// ===============================
-
 module.exports = async (req, res) => {
-  // Set CORS headers before connecting to MongoDB so the browser can show
-  // the real backend error instead of hiding it as a network/CORS failure.
   const origin = req.headers.origin;
   res.setHeader("Access-Control-Allow-Origin", origin || "*");
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
+  if (req.method === "OPTIONS") return res.status(204).end();
+
+  const pathname = String(req.url || "/").split("?")[0];
+  if (pathname === "/api/health" || pathname === "/api/health/" || pathname === "/health") {
+    const mongoUriConfigured = Boolean(String(process.env.MONGO_URI || "").trim());
+    const jwtSecretConfigured = Boolean(String(process.env.JWT_SECRET || "").trim());
+
+    if (!mongoUriConfigured) {
+      return res.status(503).json({
+        success: false,
+        server: "running",
+        database: "not_configured",
+        mongoUriConfigured: false,
+        jwtSecretConfigured,
+        message: "MONGO_URI is missing or empty in the environment for this deployment."
+      });
+    }
+
+    try {
+      await connectDB();
+      return res.status(200).json({
+        success: true,
+        server: "running",
+        database: "connected",
+        mongoUriConfigured: true,
+        jwtSecretConfigured
+      });
+    } catch (error) {
+      console.error("HEALTH CHECK DATABASE ERROR:", error);
+      return res.status(503).json({
+        success: false,
+        server: "running",
+        database: "connection_failed",
+        mongoUriConfigured: true,
+        jwtSecretConfigured,
+        errorType: error.name || "DatabaseError",
+        message: "MONGO_URI exists, but MongoDB connection failed. Check the Atlas password, URL encoding, cluster status, and Network Access."
+      });
+    }
   }
 
   try {
@@ -112,10 +115,9 @@ module.exports = async (req, res) => {
     return app(req, res);
   } catch (error) {
     console.error("DATABASE/SERVER ERROR:", error);
-    return res.status(500).json({
+    return res.status(503).json({
       success: false,
-      message: "Backend connection failed. Check MONGO_URI and MongoDB Atlas network access.",
-      error: error.message,
+      message: "VehicleHub database is unavailable. Open /api/health for the configuration status."
     });
   }
 };
