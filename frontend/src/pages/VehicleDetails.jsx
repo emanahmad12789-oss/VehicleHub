@@ -335,7 +335,7 @@ function VehicleDetails() {
               )}
 
               {/* ACTION BUTTONS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={`grid grid-cols-1 ${(vehicle.sellerEmail || vehicle.email) ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-3`}>
 
                 <button
                   onClick={handleCall}
@@ -352,6 +352,16 @@ function VehicleDetails() {
                   <MessageCircle size={19} />
                   WhatsApp Seller
                 </button>
+
+                {(vehicle.sellerEmail || vehicle.email) && (
+                  <Link
+                    to={`/messages?to=${encodeURIComponent(vehicle.sellerEmail || vehicle.email)}&vehicleId=${encodeURIComponent(vehicle._id || "")}&vehicleTitle=${encodeURIComponent(title)}`}
+                    className="flex items-center justify-center gap-2 bg-[#B86F52] text-white py-3.5 rounded-xl hover:bg-[#A65F45] transition"
+                  >
+                    <MessageCircle size={19} />
+                    Message Seller
+                  </Link>
+                )}
 
               </div>
 
