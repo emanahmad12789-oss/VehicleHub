@@ -24,8 +24,12 @@ async function requireAuth(req, res, next) {
     req.user = user;
     return next();
   } catch (error) {
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
-      return res.status(401).json({ success: false, message: "Your session has expired. Please log in again." });
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ success: false, code: "TOKEN_EXPIRED", message: "Your login token has expired. Please log in again." });
+    }
+    if (error.name === "JsonWebTokenError" || error.name === "NotBeforeError") {
+      console.warn("AUTH TOKEN REJECTED:", error.name, error.message);
+      return res.status(401).json({ success: false, code: "TOKEN_INVALID", message: "Your login token is invalid for this backend. Please log out, log in again, and retry." });
     }
 
     console.error("AUTH MIDDLEWARE ERROR:", error);
