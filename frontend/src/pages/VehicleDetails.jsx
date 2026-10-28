@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = "/api/vehicles";
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api/vehicles";
 
 function VehicleDetails() {
   const { id } = useParams();
@@ -31,13 +31,19 @@ function VehicleDetails() {
 
         const response = await fetch(`${API_URL}/${id}`);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Vehicle not found");
+        const responseText = await response.text();
+        let data;
+        try {
+          data = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          throw new Error("Backend returned a non-JSON page (HTTP " + response.status + "). Check the backend deployment URL and Vercel protection.");
         }
 
-        setVehicle(data);
+        if (!response.ok) {
+          throw new Error((data && data.message) || ("Vehicle request failed (HTTP " + response.status + ")."));
+        }
+
+        setVehicle((data && data.vehicle) || data);
       } catch (error) {
         console.error(error);
         setError(error.message || "Failed to load vehicle.");
