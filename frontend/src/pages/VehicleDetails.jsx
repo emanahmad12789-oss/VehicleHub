@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = "/api/vehicles";
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api/vehicles";
 
 function VehicleDetails() {
   const { id } = useParams();
