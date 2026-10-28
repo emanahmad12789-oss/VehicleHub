@@ -9,7 +9,7 @@ import {
 
 import Navbar from "../components/Navbar";
 
-const API_URL = "https://vehicle-hub-h35a.vercel.app/api";
+const API_URL = "/api";
 
 function AddVehicle() {
   const navigate = useNavigate();
