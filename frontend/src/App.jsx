@@ -12,88 +12,27 @@ import VehicleDetails from "./pages/VehicleDetails";
 import Favorites from "./pages/Favorites";
 import Messages from "./pages/messages";
 import EditVehicle from "./pages/EditVehicle";
+import OwnerPanel from "./pages/OwnerPanel";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* HOME */}
-        <Route
-          path="/"
-          element={<Home />}
-        />
-
-        {/* AUTH */}
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        {/* PROFILE */}
-        <Route
-          path="/profile"
-          element={<Profile />}
-        />
-
-        {/* VEHICLES */}
-        <Route
-          path="/cars"
-          element={<Cars />}
-        />
-
-        <Route
-          path="/bikes"
-          element={<Bikes />}
-        />
-
-        {/* ADD VEHICLE */}
-        <Route
-          path="/add-vehicle"
-          element={<AddVehicle />}
-        />
-
-        {/* MY LISTINGS */}
-        <Route
-          path="/my-listings"
-          element={<MyListings />}
-        />
-
-        {/* EDIT VEHICLE */}
-        <Route
-          path="/edit-vehicle/:id"
-          element={<EditVehicle />}
-        />
-
-        {/* VEHICLE DETAILS */}
-        <Route
-          path="/vehicle/:id"
-          element={<VehicleDetails />}
-        />
-
-        {/* FAVORITES */}
-        <Route
-          path="/favorites"
-          element={<Favorites />}
-        />
-
-        {/* MESSAGES */}
-        <Route
-          path="/messages"
-          element={<Messages />}
-        />
-
-        {/* FALLBACK */}
-        <Route
-          path="*"
-          element={<Home />}
-        />
-
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/cars" element={<Cars />} />
+        <Route path="/bikes" element={<Bikes />} />
+        <Route path="/add-vehicle" element={<AddVehicle />} />
+        <Route path="/my-listings" element={<MyListings />} />
+        <Route path="/edit-vehicle/:id" element={<EditVehicle />} />
+        <Route path="/vehicle/:id" element={<VehicleDetails />} />
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/admin" element={<OwnerPanel />} />
+        <Route path="/owner" element={<OwnerPanel />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
