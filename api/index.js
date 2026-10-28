@@ -5,6 +5,7 @@ const cors = require("cors");
 const authRoutes = require("../backend/routes/auth");
 const vehicleRoutes = require("../backend/routes/vehicles");
 const messageRoutes = require("../backend/routes/messages");
+const adminRoutes = require("../backend/routes/admin");
 
 const app = express();
 
@@ -41,6 +42,7 @@ async function connectDB() {
 app.use(["/api/auth", "/auth"], authRoutes);
 app.use(["/api/vehicles", "/vehicles"], vehicleRoutes);
 app.use(["/api/messages", "/messages"], messageRoutes);
+app.use(["/api/admin", "/admin"], adminRoutes);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "VehicleHub Backend is running." });
@@ -108,7 +110,7 @@ module.exports = async (req, res) => {
         errorType: error.name || "DatabaseError",
         errorCode: error.code || error.codeName || null,
         details: String(error.message || "Unknown database error")
-          .replace(/mongodb\S*/gi, "[redacted MongoDB URI]")
+          .replace(/mongodb\\S*/gi, "[redacted MongoDB URI]")
           .slice(0, 400),
         message: "MONGO_URI exists, but MongoDB connection failed. Check the Atlas password, URL encoding, cluster status, and Network Access."
       });
