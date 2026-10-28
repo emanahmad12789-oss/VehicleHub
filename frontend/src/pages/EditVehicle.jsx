@@ -116,7 +116,7 @@ function EditVehicle() {
       setError("");
 
       const response = await fetch(
-          `${API_URL}/${id}`
+        `${API_URL}/${id}`,
         {
           method: "PUT",
           headers: {
