@@ -51,8 +51,22 @@ function Profile() {
         }
 
         // Get latest user information from MongoDB
+        const token = localStorage.getItem("vehicleHubToken");
+        if (!token) {
+          setUser(parsedUser);
+          setFormData({
+            name: parsedUser.name || "",
+            email: parsedUser.email || "",
+            phone: parsedUser.phone || "",
+            city: parsedUser.city || "Pakistan",
+          });
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(
-          `/api/auth/profile/${parsedUser._id}`
+          `/api/auth/profile/${parsedUser._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const data = await response.json();
@@ -149,11 +163,13 @@ function Profile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("vehicleHubToken") || ""}`,
           },
           body: JSON.stringify({
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
+            city: formData.city,
           }),
         }
       );
