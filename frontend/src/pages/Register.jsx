@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Phone, UserPlus } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || "https://vehicle-hub-h35a.vercel.app/api").replace(/\/+$/, "");
 
 function Register() {
   const navigate = useNavigate();
