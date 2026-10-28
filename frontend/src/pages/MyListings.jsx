@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-const API_URL = "/api/vehicles";
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api/vehicles";
 
 function MyListings() {
   const navigate = useNavigate();
@@ -78,13 +78,16 @@ function MyListings() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(`Backend returned a non-JSON response (HTTP ${response.status}). Check the backend deployment and API URL.`);
+      }
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to load your listings."
-        );
+        throw new Error(data.message || data.error || `Failed to load your listings (HTTP ${response.status}).`);
       }
 
       // Backend may return an array
@@ -141,12 +144,16 @@ function MyListings() {
         }
       );
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(`Backend returned a non-JSON response (HTTP ${response.status}) while deleting.`);
+      }
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Delete failed."
-        );
+        throw new Error(data.message || data.error || `Delete failed (HTTP ${response.status}).`);
       }
 
       setVehicles((previous) =>
