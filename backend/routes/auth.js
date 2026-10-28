@@ -93,7 +93,16 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    let passwordMatch = await bcrypt.compare(password, user.password);
+
+    // One-time migration for older accounts that were manually saved with a
+    // plain-text password. Re-hash immediately after a successful match.
+    if (!passwordMatch && typeof user.password === "string" && user.password === password) {
+      user.password = await bcrypt.hash(password, 10);
+      await user.save();
+      passwordMatch = true;
+    }
+
     if (!passwordMatch) {
       return res.status(401).json({
         success: false,
