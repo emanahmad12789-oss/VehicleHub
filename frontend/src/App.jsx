@@ -12,6 +12,7 @@ import VehicleDetails from "./pages/VehicleDetails";
 import Favorites from "./pages/Favorites";
 import Messages from "./pages/messages";
 import EditVehicle from "./pages/EditVehicle";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -87,6 +88,9 @@ function App() {
           path="/messages"
           element={<Messages />}
         />
+
+        {/* OWNER DASHBOARD */}
+        <Route path="/admin" element={<Admin />} />
 
         {/* FALLBACK */}
         <Route
