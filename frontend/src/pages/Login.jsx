@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 
 // Keep login on the same origin as the rest of VehicleHub.
 // The root Vercel deployment serves both frontend and /api routes.
-const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/+$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || "https://vehicle-hub-h35a.vercel.app/api").replace(/\/+$/, "");
 
 function Login() {
   const navigate = useNavigate();
