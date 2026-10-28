@@ -9,6 +9,8 @@ import {
 
 import Navbar from "../components/Navbar";
 
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api/vehicles";
+
 function EditVehicle() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,17 +46,24 @@ function EditVehicle() {
         setError("");
 
         const response = await fetch(
-          `/api/vehicles/${id}`
+          `${API_URL}/${id}`
         );
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+          data = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          throw new Error("Backend returned a non-JSON page (HTTP " + response.status + "). Check the backend deployment URL.");
+        }
 
         if (!response.ok) {
           throw new Error(
-            data.message || "Vehicle could not be found"
+            (data && data.message) || ("Vehicle could not be found (HTTP " + response.status + ").")
           );
         }
 
+        data = (data && data.vehicle) || data;
         setFormData({
           title: data.title || "",
           type: data.type || "Car",
@@ -107,7 +116,7 @@ function EditVehicle() {
       setError("");
 
       const response = await fetch(
-        `/api/vehicles/${id}`,
+          `${API_URL}/${id}`
         {
           method: "PUT",
           headers: {
@@ -122,11 +131,17 @@ function EditVehicle() {
         }
       );
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        throw new Error("Backend returned a non-JSON page (HTTP " + response.status + "). Check the backend deployment URL.");
+      }
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to update vehicle"
+          (data && data.message) || ("Failed to update vehicle (HTTP " + response.status + ").")
         );
       }
 
