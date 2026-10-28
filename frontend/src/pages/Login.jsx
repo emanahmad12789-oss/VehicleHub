@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { CarFront, Mail, Lock, ArrowRight } from "lucide-react";
 import Navbar from "../components/Navbar";
 
+// Use the full-stack Vercel deployment by default because the frontend
+// may also be hosted on a separate Vercel project/domain.
 const API_URL = (
   import.meta.env.VITE_API_URL ||
-  "/"
+  "https://vehicle-hub-vehicle-hub.vercel.app"
 ).replace(/\/+$/, "");
 
 function Login() {
