@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { MessageCircle, Send, ArrowLeft, UserCircle, RefreshCw } from "lucide-react";
 import Navbar from "../components/Navbar";
 
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api/messages";
+
 function Messages() {
   const [searchParams] = useSearchParams();
   const token = localStorage.getItem("vehicleHubToken") || "";
@@ -29,9 +31,15 @@ function Messages() {
   const loadConversations = useCallback(async () => {
     if (!token) return;
     try {
-      const response = await fetch("/api/messages/conversations", { headers: authHeaders });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not load conversations.");
+      const response = await fetch(`${API_URL}/conversations`, { headers: authHeaders });
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("Messages API returned a non-JSON page (HTTP " + response.status + "). Check backend deployment/protection.");
+      }
+      if (!response.ok) throw new Error(data.message || ("Could not load conversations (HTTP " + response.status + ")."));
       setConversations(Array.isArray(data.conversations) ? data.conversations : []);
     } catch (err) {
       setError(err.message || "Could not load conversations.");
@@ -43,11 +51,17 @@ function Messages() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`/api/messages/with/${encodeURIComponent(email)}`, {
+      const response = await fetch(`${API_URL}/with/${encodeURIComponent(email)}`, {
         headers: authHeaders
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not load this conversation.");
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("Messages API returned a non-JSON page (HTTP " + response.status + "). Check backend deployment/protection.");
+      }
+      if (!response.ok) throw new Error(data.message || ("Could not load conversation (HTTP " + response.status + ")."));
       setOtherUser(data.otherUser || { email, name: email });
       setMessages(Array.isArray(data.messages) ? data.messages : []);
     } catch (err) {
@@ -81,13 +95,19 @@ function Messages() {
     setSending(true);
     setError("");
     try {
-      const response = await fetch(`/api/messages/with/${encodeURIComponent(selectedEmail)}`, {
+      const response = await fetch(`${API_URL}/with/${encodeURIComponent(selectedEmail)}`, {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({ text, vehicleId, vehicleTitle })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Message could not be sent.");
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("Messages API returned a non-JSON page (HTTP " + response.status + "). Check backend deployment/protection.");
+      }
+      if (!response.ok) throw new Error(data.message || ("Message could not be sent (HTTP " + response.status + ")."));
 
       setMessages((previous) => [...previous, data.message]);
       setMessageText("");
