@@ -8,22 +8,23 @@ const vehicleRoutes = require("./routes/vehicles");
 const messageRoutes = require("./routes/messages");
 
 const app = express();
-
 const PORT = process.env.PORT || 5000;
 
+// This API uses bearer tokens rather than cross-origin cookies, so wildcard
+// origin is valid as long as credentials are not enabled.
 app.use(
   cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: false,
+    optionsSuccessStatus: 204,
   })
 );
 
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 
-// Backend status
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -31,7 +32,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -41,12 +41,10 @@ app.get("/health", (req, res) => {
   });
 });
 
-// API routes (FIXED — relative paths)
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/messages", messageRoutes);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -54,17 +52,14 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
-
   res.status(500).json({
     success: false,
     message: "Internal server error",
   });
 });
 
-// MongoDB connection and server startup
 async function startServer() {
   try {
     if (!process.env.MONGO_URI) {
