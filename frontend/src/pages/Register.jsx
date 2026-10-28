@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Phone, UserPlus } from "lucide-react";
 import Navbar from "../components/Navbar";
 
+const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\\/+$/, "");
+
 function Register() {
   const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        "/api/auth/register",
+        `${API_URL}/auth/register`,
         {
           method: "POST",
           headers: {
