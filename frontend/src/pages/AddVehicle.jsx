@@ -139,6 +139,9 @@ function AddVehicle() {
           localStorage.removeItem("vehicleHubToken");
           localStorage.removeItem("vehicleHubLoggedIn");
           localStorage.removeItem("vehicleHubUser");
+          localStorage.removeItem("user");
+          localStorage.removeItem("userEmail");
+          localStorage.removeItem("email");
           setError("Your session is invalid or expired. Please log in again, then publish your listing.");
           return;
         }
@@ -150,7 +153,7 @@ function AddVehicle() {
         "Vehicle listing published successfully!"
       );
 
-      navigate("/");
+      navigate("/my-listings", { replace: true });
 
     } catch (error) {
       console.error(
