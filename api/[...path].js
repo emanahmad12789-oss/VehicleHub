@@ -38,9 +38,9 @@ async function connectDB() {
   }
 }
 
-app.use("/api/auth", authRoutes);
-app.use("/api/vehicles", vehicleRoutes);
-app.use("/api/messages", messageRoutes);
+app.use(["/api/auth", "/auth"], authRoutes);
+app.use(["/api/vehicles", "/vehicles"], vehicleRoutes);
+app.use(["/api/messages", "/messages"], messageRoutes);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "VehicleHub Backend is running." });
@@ -72,7 +72,8 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(204).end();
 
   const pathname = String(req.url || "/").split("?")[0];
-  if (pathname === "/api/health" || pathname === "/api/health/" || pathname === "/health") {
+  const normalizedPath = pathname.replace(/^\/api(?=\/|$)/, "") || "/";
+  if (normalizedPath.replace(/\/+$/, "") === "/health") {
     const mongoUriConfigured = Boolean(String(process.env.MONGO_URI || "").trim());
     const jwtSecretConfigured = Boolean(String(process.env.JWT_SECRET || "").trim());
 
