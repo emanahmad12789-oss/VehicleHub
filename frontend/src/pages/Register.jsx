@@ -43,7 +43,7 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
-        setError(data.message || "Registration failed. Please try again.");
+        setError(data.message || data.error || `Registration failed (HTTP ${response.status}). Please try again.`);
         return;
       }
 
