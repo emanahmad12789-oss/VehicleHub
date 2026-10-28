@@ -9,6 +9,8 @@ import {
 
 import Navbar from "../components/Navbar";
 
+const API_URL = "https://vehicle-hub-h35a.vercel.app/api";
+
 function AddVehicle() {
   const navigate = useNavigate();
 
@@ -110,7 +112,7 @@ function AddVehicle() {
       };
 
       const response = await fetch(
-        "/api/vehicles",
+        `${API_URL}/vehicles`,
         {
           method: "POST",
 
@@ -123,15 +125,24 @@ function AddVehicle() {
         }
       );
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        setError("Backend returned a non-JSON response (HTTP " + response.status + "). Check the backend deployment.");
+        return;
+      }
 
       if (!response.ok) {
-        setError(
-          data.message ||
-            "Failed to publish vehicle"
-        );
-
-        setLoading(false);
+        if (response.status === 401) {
+          localStorage.removeItem("vehicleHubToken");
+          localStorage.removeItem("vehicleHubLoggedIn");
+          localStorage.removeItem("vehicleHubUser");
+          setError("Your session is invalid or expired. Please log in again, then publish your listing.");
+          return;
+        }
+        setError(data.message || data.error || ("Failed to publish vehicle (HTTP " + response.status + ")."));
         return;
       }
 
