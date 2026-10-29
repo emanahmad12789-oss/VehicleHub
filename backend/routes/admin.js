@@ -58,6 +58,29 @@ router.delete("/users/:id", async (req, res) => {
   }
 });
 
+router.patch("/users/:id/status", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID." });
+    }
+    const status = String(req.body?.status || "").trim().toLowerCase();
+    if (!["active", "suspended"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Status must be active or suspended." });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
+    if (String(user.email).trim().toLowerCase() === String(req.user.email).trim().toLowerCase()) {
+      return res.status(400).json({ success: false, message: "You cannot change your own owner account status." });
+    }
+    user.status = status;
+    await user.save();
+    return res.json({ success: true, message: status === "suspended" ? "User suspended." : "User reactivated.", user: { _id: user._id, status: user.status } });
+  } catch (error) {
+    console.error("OWNER UPDATE USER STATUS ERROR:", error);
+    return res.status(500).json({ success: false, message: "Could not update this user's status." });
+  }
+});
+
 router.get("/vehicles", async (req, res) => {
   try {
     const vehicles = await Vehicle.find({}).sort({ createdAt: -1 }).limit(1000).lean();
