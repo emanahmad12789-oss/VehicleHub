@@ -26,7 +26,7 @@ router.get("/overview", async (req, res) => {
 
 router.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}, "name email phone city createdAt updatedAt")
+    const users = await User.find({}, "name email phone city status createdAt updatedAt")
       .sort({ createdAt: -1 }).limit(1000).lean();
     res.json({ success: true, users });
   } catch (error) {
