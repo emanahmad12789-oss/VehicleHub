@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /owner
+Disallow: /admin
+Disallow: /profile
+Disallow: /messages
+Disallow: /my-listings
+Disallow: /favorites
+Disallow: /add-vehicle
+Sitemap: https://vehicle-hub-swart.vercel.app/sitemap.xml
